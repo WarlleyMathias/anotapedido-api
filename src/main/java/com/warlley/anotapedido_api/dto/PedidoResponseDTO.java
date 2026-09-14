@@ -9,10 +9,9 @@ import java.util.List;
 public record PedidoResponseDTO(
         Long id,
         Usuario usuario,
-        List<ItemPedido> itemPedidoList,
-        Float total
+        List<ItemPedido> itemPedidoList
 ) {
     public PedidoResponseDTO(Pedido pedido){
-        this(pedido.getId(), pedido.getUsuario(),pedido.getItemPedidoList(), pedido.getTotal());
+        this(pedido.getId(), pedido.getUsuario(),pedido.getItemPedidoList());
     }
 }

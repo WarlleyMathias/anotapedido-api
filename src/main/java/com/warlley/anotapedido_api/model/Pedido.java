@@ -1,6 +1,5 @@
 package com.warlley.anotapedido_api.model;
 
-import com.warlley.anotapedido_api.dto.PedidoRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,19 +20,5 @@ public class Pedido {
     private Usuario usuario;
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
     private List<ItemPedido> itemPedidoList = new ArrayList<>();
-    private Float total;
 
-    public Pedido(PedidoRequestDTO pedidoRequestDTO){
-        this.usuario = pedidoRequestDTO.usuario();
-        this.itemPedidoList = pedidoRequestDTO.itemPedidoList();
-        this.total = somaTotal();
-    }
-
-    public Float somaTotal(){
-        Float total = 0f;
-        for(ItemPedido itemPedido : itemPedidoList){
-            total = itemPedido.getPrecoSubTotal();
-        }
-        return total;
-    }
 }
