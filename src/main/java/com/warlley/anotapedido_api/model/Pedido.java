@@ -14,6 +14,7 @@ import java.util.List;
 @Entity(name = "pedidos")
 public class Pedido {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @ManyToOne
     @JoinColumn(name = "usuario_id")

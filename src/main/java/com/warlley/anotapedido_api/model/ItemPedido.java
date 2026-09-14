@@ -1,10 +1,7 @@
 package com.warlley.anotapedido_api.model;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -15,6 +12,7 @@ import lombok.Setter;
 @Entity(name = "itemPedidos")
 public class ItemPedido {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @ManyToOne
     @JoinColumn(name = "produto_id")
@@ -23,4 +21,10 @@ public class ItemPedido {
     private Float precoUnitario;
     private Float precoSubTotal;
 
+    public ItemPedido(Produto produto, int quantidade){
+        this.produto       = produto;
+        this.quantidade    = quantidade;
+        this.precoUnitario = produto.getValor();
+        this.precoSubTotal = precoUnitario*quantidade;
+    }
 }
