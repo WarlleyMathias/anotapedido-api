@@ -1,16 +1,16 @@
 package com.warlley.anotapedido_api.model;
 
+import com.warlley.anotapedido_api.dto.UsuarioRequestDTO;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Setter
 @Getter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity(name = "usuarios")
 public class Usuario {
     @Id
@@ -20,4 +20,11 @@ public class Usuario {
     private String senha;
     private String nome;
     private String endereco;
+
+    public Usuario(UsuarioRequestDTO usuarioRequestDto){
+        this.email = usuarioRequestDto.email();
+        this.nome  = usuarioRequestDto.nome();
+        this.endereco = usuarioRequestDto.endereco();
+        this.senha = usuarioRequestDto.senha();
+    }
 }

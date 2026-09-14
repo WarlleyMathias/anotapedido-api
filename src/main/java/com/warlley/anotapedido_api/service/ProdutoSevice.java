@@ -1,10 +1,11 @@
 package com.warlley.anotapedido_api.service;
 
+import com.warlley.anotapedido_api.dto.ProdutoRequestDTO;
+import com.warlley.anotapedido_api.dto.ProdutoResponseDTO;
 import com.warlley.anotapedido_api.model.Produto;
 import com.warlley.anotapedido_api.repository.ProdutoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -14,16 +15,18 @@ public class ProdutoSevice {
 
     private final ProdutoRepository produtoRepository;
 
-    public Produto cadastrarProduto(Produto novoProduto){
-        return produtoRepository.save(novoProduto);
+    public ProdutoResponseDTO cadastrarProduto(ProdutoRequestDTO produtoRequestDTO){
+        Produto produtoNovo = new Produto(produtoRequestDTO);
+        return new ProdutoResponseDTO(produtoRepository.save(produtoNovo));
     }
-    public Produto buscarProduto(Long idProduto){
-        return produtoRepository.findById(idProduto)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Produto não encontrado."));
+    public ProdutoResponseDTO buscarProduto(Long idProduto){
+        return new ProdutoResponseDTO(produtoRepository.findById(idProduto)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Produto não encontrado.")));
     }
-    public Produto editarProduto(Produto novoProduto){
-        if (produtoRepository.existsById(novoProduto.getId())){
-            return produtoRepository.save(novoProduto);
+    public ProdutoResponseDTO editarProduto(ProdutoRequestDTO produtoRequestDTO, Long idProduto){
+        Produto produtoNovo = new Produto(produtoRequestDTO);
+        if (produtoRepository.existsById(idProduto)){
+            return new ProdutoResponseDTO(produtoRepository.save(produtoNovo));
         }
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Produto não encontrado, para editar.");
     }

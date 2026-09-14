@@ -1,5 +1,7 @@
 package com.warlley.anotapedido_api.service;
 
+import com.warlley.anotapedido_api.dto.ItemPedidoRequestDTO;
+import com.warlley.anotapedido_api.dto.ItemPedidoResponseDTO;
 import com.warlley.anotapedido_api.model.ItemPedido;
 import com.warlley.anotapedido_api.repository.ItemPedidoRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,16 +15,18 @@ public class ItemPedidoSevice {
 
     private final ItemPedidoRepository itemPedidoRepository;
 
-    public ItemPedido buscarItemPedido(Long idItemPedido){
-        return itemPedidoRepository.findById(idItemPedido).
-                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"ItemPedido não encotrado."));
+    public ItemPedidoResponseDTO buscarItemPedido(Long idItemPedido){
+        return new ItemPedidoResponseDTO(itemPedidoRepository.findById(idItemPedido).
+                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"ItemPedido não encotrado.")));
     }
-    public ItemPedido salvarItemPedido(ItemPedido itemPedido){
-        return itemPedidoRepository.save(itemPedido);
+    public ItemPedidoResponseDTO salvarItemPedido(ItemPedidoRequestDTO itemPedidoRequestDTO){
+        ItemPedido itemPedidoNovo = new ItemPedido(itemPedidoRequestDTO);
+        return new ItemPedidoResponseDTO(itemPedidoRepository.save(itemPedidoNovo));
     }
-    public ItemPedido editarItemPedido(ItemPedido itemPedido){
-        if(itemPedidoRepository.existsById(itemPedido.getId())){
-            return itemPedidoRepository.save(itemPedido);
+    public ItemPedidoResponseDTO editarItemPedido(ItemPedidoRequestDTO itemPedidoRequestDTO, Long idItemPedido){
+        ItemPedido itemPedidoNovo = new ItemPedido(itemPedidoRequestDTO);
+        if(itemPedidoRepository.existsById(idItemPedido)){
+            return new ItemPedidoResponseDTO(itemPedidoRepository.save(itemPedidoNovo));
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ItemPedido não encontrado, para ser editado.");
     }

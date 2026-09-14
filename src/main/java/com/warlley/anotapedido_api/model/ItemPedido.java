@@ -1,14 +1,14 @@
 package com.warlley.anotapedido_api.model;
 
 
+import com.warlley.anotapedido_api.dto.ItemPedidoRequestDTO;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Setter
 @Getter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity(name = "itemPedidos")
 public class ItemPedido {
     @Id
@@ -20,11 +20,15 @@ public class ItemPedido {
     private int quantidade;
     private Float precoUnitario;
     private Float precoSubTotal;
+    @ManyToOne
+    @JoinColumn(name = "pedido_id")
+    private Pedido pedido;
 
-    public ItemPedido(Produto produto, int quantidade){
-        this.produto       = produto;
-        this.quantidade    = quantidade;
+    public ItemPedido(ItemPedidoRequestDTO itemPedidoRequestDTO){
+        this.produto       = itemPedidoRequestDTO.produto();
+        this.quantidade    = itemPedidoRequestDTO.quantidade();
         this.precoUnitario = produto.getValor();
         this.precoSubTotal = precoUnitario*quantidade;
+        this.pedido        = itemPedidoRequestDTO.pedido();
     }
 }

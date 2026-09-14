@@ -1,16 +1,16 @@
 package com.warlley.anotapedido_api.model;
 
+import com.warlley.anotapedido_api.dto.PedidoRequestDTO;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Setter
 @Getter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity(name = "pedidos")
 public class Pedido {
     @Id
@@ -19,6 +19,21 @@ public class Pedido {
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
-    @OneToMany(mappedBy = "pedidos", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
     private List<ItemPedido> itemPedidoList = new ArrayList<>();
+    private Float total;
+
+    public Pedido(PedidoRequestDTO pedidoRequestDTO){
+        this.usuario = pedidoRequestDTO.usuario();
+        this.itemPedidoList = pedidoRequestDTO.itemPedidoList();
+        this.total = somaTotal();
+    }
+
+    public Float somaTotal(){
+        Float total = 0f;
+        for(ItemPedido itemPedido : itemPedidoList){
+            total = itemPedido.getPrecoSubTotal();
+        }
+        return total;
+    }
 }

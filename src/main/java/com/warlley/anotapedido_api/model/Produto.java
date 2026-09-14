@@ -1,16 +1,16 @@
 package com.warlley.anotapedido_api.model;
 
+import com.warlley.anotapedido_api.dto.ProdutoRequestDTO;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Setter
 @Getter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity(name = "produtos")
 public class Produto {
     @Id
@@ -18,4 +18,9 @@ public class Produto {
     private Long id;
     private String nome;
     private Float valor;
+
+    public Produto(ProdutoRequestDTO produtoRequestDTO){
+        this.nome = produtoRequestDTO.nome();
+        this.valor = produtoRequestDTO.valor();
+    }
 }
