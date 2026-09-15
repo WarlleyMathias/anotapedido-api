@@ -9,6 +9,6 @@ public record PedidoRequestDTO(
         @NotBlank(message = "campo usuário não pode ser vazio.")
         Long usuarioId,
         @NotBlank(message = "campo itemPedidoList não pode ser vazio.")
-        List<ItemPedidoRequestDTO> itens
+        List<ItemPedidoRequestDTO> itemPedidoRequestDTOList
 
 ) {}

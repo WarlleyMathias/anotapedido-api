@@ -21,13 +21,19 @@ public class UsuarioService {
     }
     public UsuarioResponseDTO cadastrarUsuario(UsuarioRequestDTO usuarioRequestDTO){
         Usuario usuarioNovo = new Usuario(usuarioRequestDTO);
-        return new UsuarioResponseDTO(usuarioRepository.save(usuarioNovo));
+        if(!usuarioRepository.existsByEmail(usuarioRequestDTO.email())){
+            return new UsuarioResponseDTO(usuarioRepository.save(usuarioNovo));
+        }
+        throw new ResponseStatusException(HttpStatus.CONFLICT,"Já existe um Usuário cadastrado com esse email.");
     }
 
     public UsuarioResponseDTO editarUsuario(UsuarioRequestDTO usuarioRequestDTO, Long idUsuario){
         Usuario usuarioNovo = new Usuario(usuarioRequestDTO);
         if(usuarioRepository.existsById(usuarioNovo.getId())){
-            return new UsuarioResponseDTO(usuarioRepository.save(usuarioNovo));
+            if(!usuarioRepository.existsByEmail(usuarioRequestDTO.email()) || usuarioRequestDTO.email().equals(buscaUsuario(idUsuario).email())){
+                return new UsuarioResponseDTO(usuarioRepository.save(usuarioNovo));
+            }
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Já existe um Usuário cadastrado com esse email.");
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Usuário não encontrado, para ser editado.");
     }

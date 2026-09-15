@@ -24,9 +24,9 @@ public class ItemPedido {
     @JoinColumn(name = "pedido_id")
     private Pedido pedido;
 
-    public ItemPedido(Produto produto, ItemPedidoRequestDTO itemPedidoRequestDTO){
+    public ItemPedido(Produto produto, int quantidade){
         this.produto       = produto;
-        this.quantidade    = itemPedidoRequestDTO.quantidade();
+        this.quantidade    = quantidade;
         this.precoUnitario = produto.getValor();
         this.precoSubTotal = precoUnitario*quantidade;
     }

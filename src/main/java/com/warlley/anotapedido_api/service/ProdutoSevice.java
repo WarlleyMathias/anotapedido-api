@@ -17,7 +17,10 @@ public class ProdutoSevice {
 
     public ProdutoResponseDTO cadastrarProduto(ProdutoRequestDTO produtoRequestDTO){
         Produto produtoNovo = new Produto(produtoRequestDTO);
-        return new ProdutoResponseDTO(produtoRepository.save(produtoNovo));
+        if (!produtoRepository.existsByNome(produtoRequestDTO.nome())) {
+            return new ProdutoResponseDTO(produtoRepository.save(produtoNovo));
+        }
+        throw new ResponseStatusException(HttpStatus.CONFLICT,"Já existe um Produto com esse nome.");
     }
     public ProdutoResponseDTO buscarProduto(Long idProduto){
         return new ProdutoResponseDTO(produtoRepository.findById(idProduto)
@@ -26,7 +29,10 @@ public class ProdutoSevice {
     public ProdutoResponseDTO editarProduto(ProdutoRequestDTO produtoRequestDTO, Long idProduto){
         Produto produtoNovo = new Produto(produtoRequestDTO);
         if (produtoRepository.existsById(idProduto)){
-            return new ProdutoResponseDTO(produtoRepository.save(produtoNovo));
+            if (!produtoRepository.existsByNome(produtoRequestDTO.nome()) || produtoRequestDTO.nome().equals(buscarProduto(idProduto).nome())) {
+                return new ProdutoResponseDTO(produtoRepository.save(produtoNovo));
+            }
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Já existe um Produto com esse nome.");
         }
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Produto não encontrado, para editar.");
     }
@@ -35,6 +41,11 @@ public class ProdutoSevice {
             produtoRepository.deleteById(idProduto);
         }
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Produto não encontrado, para ser deletado.");
+
+    }
+    public Produto findId(Long idProduto){
+        return produtoRepository.findById(idProduto)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Produto não encontrado."));
 
     }
 }
