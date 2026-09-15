@@ -21,7 +21,7 @@ public class UsuarioService {
     }
     public UsuarioResponseDTO cadastrarUsuario(UsuarioRequestDTO usuarioRequestDTO){
         Usuario usuarioNovo = new Usuario(usuarioRequestDTO);
-        if(!usuarioRepository.existsByEmail(usuarioRequestDTO.email())){
+        if(usuarioRepository.existsByEmailFalse(usuarioRequestDTO.email())){
             return new UsuarioResponseDTO(usuarioRepository.save(usuarioNovo));
         }
         throw new ResponseStatusException(HttpStatus.CONFLICT,"Já existe um Usuário cadastrado com esse email.");
@@ -30,7 +30,7 @@ public class UsuarioService {
     public UsuarioResponseDTO editarUsuario(UsuarioRequestDTO usuarioRequestDTO, Long idUsuario){
         Usuario usuarioNovo = new Usuario(usuarioRequestDTO);
         if(usuarioRepository.existsById(usuarioNovo.getId())){
-            if(!usuarioRepository.existsByEmail(usuarioRequestDTO.email()) || usuarioRequestDTO.email().equals(buscaUsuario(idUsuario).email())){
+            if(usuarioRepository.existsByEmailFalse(usuarioRequestDTO.email()) || usuarioRequestDTO.email().equals(buscaUsuario(idUsuario).email())){
                 return new UsuarioResponseDTO(usuarioRepository.save(usuarioNovo));
             }
             throw new ResponseStatusException(HttpStatus.CONFLICT,"Já existe um Usuário cadastrado com esse email.");

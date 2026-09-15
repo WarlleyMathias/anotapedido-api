@@ -1,7 +1,5 @@
 package com.warlley.anotapedido_api.model;
 
-
-import com.warlley.anotapedido_api.dto.ItemPedidoRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
 

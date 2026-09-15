@@ -17,7 +17,7 @@ public class ProdutoSevice {
 
     public ProdutoResponseDTO cadastrarProduto(ProdutoRequestDTO produtoRequestDTO){
         Produto produtoNovo = new Produto(produtoRequestDTO);
-        if (!produtoRepository.existsByNome(produtoRequestDTO.nome())) {
+        if (produtoRepository.existsByNomeFalse(produtoRequestDTO.nome())) {
             return new ProdutoResponseDTO(produtoRepository.save(produtoNovo));
         }
         throw new ResponseStatusException(HttpStatus.CONFLICT,"Já existe um Produto com esse nome.");
@@ -29,7 +29,7 @@ public class ProdutoSevice {
     public ProdutoResponseDTO editarProduto(ProdutoRequestDTO produtoRequestDTO, Long idProduto){
         Produto produtoNovo = new Produto(produtoRequestDTO);
         if (produtoRepository.existsById(idProduto)){
-            if (!produtoRepository.existsByNome(produtoRequestDTO.nome()) || produtoRequestDTO.nome().equals(buscarProduto(idProduto).nome())) {
+            if (produtoRepository.existsByNomeFalse(produtoRequestDTO.nome()) || produtoRequestDTO.nome().equals(buscarProduto(idProduto).nome())) {
                 return new ProdutoResponseDTO(produtoRepository.save(produtoNovo));
             }
             throw new ResponseStatusException(HttpStatus.CONFLICT,"Já existe um Produto com esse nome.");
