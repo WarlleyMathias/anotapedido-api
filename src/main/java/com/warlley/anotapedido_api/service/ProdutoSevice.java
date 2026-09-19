@@ -15,16 +15,16 @@ public class ProdutoSevice {
 
     private final ProdutoRepository produtoRepository;
 
+    public ProdutoResponseDTO buscarProduto(Long idProduto){
+        return new ProdutoResponseDTO(produtoRepository.findById(idProduto)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Produto não encontrado.")));
+    }
     public ProdutoResponseDTO cadastrarProduto(ProdutoRequestDTO produtoRequestDTO){
         Produto produtoNovo = new Produto(produtoRequestDTO);
         if (produtoRepository.existsByNomeFalse(produtoRequestDTO.nome())) {
             return new ProdutoResponseDTO(produtoRepository.save(produtoNovo));
         }
         throw new ResponseStatusException(HttpStatus.CONFLICT,"Já existe um Produto com esse nome.");
-    }
-    public ProdutoResponseDTO buscarProduto(Long idProduto){
-        return new ProdutoResponseDTO(produtoRepository.findById(idProduto)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,"Produto não encontrado.")));
     }
     public ProdutoResponseDTO editarProduto(ProdutoRequestDTO produtoRequestDTO, Long idProduto){
         Produto produtoNovo = new Produto(produtoRequestDTO);

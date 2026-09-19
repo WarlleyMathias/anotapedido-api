@@ -29,7 +29,7 @@ public class UsuarioService {
 
     public UsuarioResponseDTO editarUsuario(UsuarioRequestDTO usuarioRequestDTO, Long idUsuario){
         Usuario usuarioNovo = new Usuario(usuarioRequestDTO);
-        if(usuarioRepository.existsById(usuarioNovo.getId())){
+        if(usuarioRepository.existsById(idUsuario)){
             if(usuarioRepository.existsByEmailFalse(usuarioRequestDTO.email()) || usuarioRequestDTO.email().equals(buscaUsuario(idUsuario).email())){
                 return new UsuarioResponseDTO(usuarioRepository.save(usuarioNovo));
             }
