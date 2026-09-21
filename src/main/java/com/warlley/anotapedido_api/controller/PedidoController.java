@@ -22,7 +22,8 @@ public class PedidoController {
     @Operation(summary = "Busca um Pedido.", description = "Recebe um id de um Pedido como parametro para buscar um Pedido.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Pedido encontrado com sucesso."),
-            @ApiResponse(responseCode = "404", description = "O ID informado não existe no banco de dados..")
+            @ApiResponse(responseCode = "404", description = "O ID informado não existe no banco de dados.."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado")
     })
     @GetMapping("/Pedidos/{idPedido}")
     public PedidoResponseDTO buscarPedido(@PathVariable Long idPedido){
@@ -32,7 +33,8 @@ public class PedidoController {
     @Operation(summary = "Cria um Pedido.", description = "Recebe um RequestPedido como parametro para criar um Pedido.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Pedido criado com sucesso."),
-            @ApiResponse(responseCode = "400", description = "parametros passado são inválidos.")
+            @ApiResponse(responseCode = "400", description = "parametros passado são inválidos."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado")
     })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/Pedidos")
@@ -44,7 +46,8 @@ public class PedidoController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Pedido atualizado com sucesso."),
             @ApiResponse(responseCode = "400", description = "parametros para atualizar o Pedido inválido."),
-            @ApiResponse(responseCode = "404", description = "Id passado como parametro não encontrado no banco de dados")})
+            @ApiResponse(responseCode = "404", description = "Id passado como parametro não encontrado no banco de dados"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado")})
     @PutMapping("/Pedidos/{idPedido}")
     public PedidoResponseDTO editarPedido(@Valid @RequestBody PedidoRequestDTO pedidoRequestDTO, @PathVariable Long idPedido){
         return pedidoService.editarPedido(pedidoRequestDTO, idPedido);
@@ -54,7 +57,8 @@ public class PedidoController {
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Deletado com sucesso."),
             @ApiResponse(responseCode = "404", description = "Pedido não existe para ser deletado."),
-            @ApiResponse(responseCode = "409", description = "conflito: bloqueou porque o Pedido está sendo usado por outra tabela.")
+            @ApiResponse(responseCode = "409", description = "conflito: bloqueou porque o Pedido está sendo usado por outra tabela."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado")
     })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/Pedidos/{idPedido}")

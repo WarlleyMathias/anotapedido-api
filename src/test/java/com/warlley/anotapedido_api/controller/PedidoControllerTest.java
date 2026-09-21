@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
@@ -46,6 +47,7 @@ public class PedidoControllerTest {
 
         @Test
         @DisplayName("Deve Retornar status 200 OK e pedido.")
+        @WithMockUser(username = "cliente@email.com")
         void deveBuscarPedido() throws Exception{
             Long idPedido = 1L;
             Usuario usuario = new Usuario();
@@ -64,6 +66,7 @@ public class PedidoControllerTest {
         }
         @Test
         @DisplayName("Deve Retornar status 404 quando pedido não existir.")
+        @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoBuscarPedido() throws Exception {
             Long idPedido = 1L;
 
@@ -75,6 +78,14 @@ public class PedidoControllerTest {
 
             verify(pedidoService, times(1)).buscarPedido(idPedido);
         }
+        @Test
+        @DisplayName("Deve bloquear a busca de pedido e retornar 401 quando não for enviado o token")
+        void buscarPedido_semToken_deveRetornarUnauthorized() throws Exception {
+            Long idPedido = 1L;
+            mockMvc.perform(get("/pedidos/{idPedido}",idPedido)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized()); // Exceção 401
+        }
     }
     @Nested
     @DisplayName("POST /pedidos - criar pedido")
@@ -82,6 +93,7 @@ public class PedidoControllerTest {
 
         @Test
         @DisplayName("Deve Retornar status 201 Created e pedido.")
+        @WithMockUser(username = "cliente@email.com")
         void deveCadastrarPedido() throws Exception{
             Usuario usuario = new Usuario();
             List<ItemPedido> itemPedidoList = new ArrayList<>();
@@ -100,6 +112,7 @@ public class PedidoControllerTest {
         }
         @Test
         @DisplayName("Deve retornar status 400 Bad Request quando parâmetros for inválido.")
+        @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoEntradaInvalidaCadastraPedido() throws Exception {
             List<ItemPedidoRequestDTO> itemPedidoRequestDTOList = new ArrayList<>();
             PedidoRequestDTO pedidoRequestDTO = new PedidoRequestDTO(null,itemPedidoRequestDTOList);
@@ -112,6 +125,13 @@ public class PedidoControllerTest {
             verify(pedidoService, never()).salvarPedido(any(PedidoRequestDTO.class));
 
         }
+        @Test
+        @DisplayName("Deve bloquear a criação de pedido e retornar 401 quando não for enviado o token")
+        void cadastrarPedido_semToken_deveRetornarUnauthorized() throws Exception {
+            mockMvc.perform(post("/pedidos")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized()); // Exceção 401
+        }
     }
     @Nested
     @DisplayName("PUT /pedidos/{idPedido} - editar pedido")
@@ -119,6 +139,7 @@ public class PedidoControllerTest {
 
         @Test
         @DisplayName("Deve Retornar status 200 OK quando pedido atualizado com sucesso.")
+        @WithMockUser(username = "cliente@email.com")
         void deveEditarPedido() throws Exception {
             Long idPedido = 1L;
             Usuario usuario = new Usuario();
@@ -140,6 +161,7 @@ public class PedidoControllerTest {
         }
         @Test
         @DisplayName("Deve retornar status 400 Bad Request quando parâmetros for inválido.")
+        @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoEntradaInvalidaEditarPedido() throws Exception {
             Long idPedido = 1L;
             List<ItemPedidoRequestDTO> itemPedidoRequestDTOList = new ArrayList<>();
@@ -154,6 +176,7 @@ public class PedidoControllerTest {
         }
         @Test
         @DisplayName("Deve Retornar status 404 Not Found quando pedido não existir.")
+        @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoEditarPedido() throws Exception {
             Long idPedido = 1L;
             Usuario usuario = new Usuario();
@@ -169,9 +192,19 @@ public class PedidoControllerTest {
 
             verify(pedidoService, times(1)).editarPedido(pedidoRequestDTO, idPedido);
         }
+        @Test
+        @DisplayName("Deve bloquear a edição de pedido e retornar 401 quando não for enviado o token")
+        void editarPedido_semToken_deveRetornarUnauthorized() throws Exception {
+            Long idPedido = 1L;
+            mockMvc.perform(put("/pedidos/{idPedido}",idPedido)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized()); // Exceção 401
+        }
+
     }
     @Nested
     @DisplayName("DELETE /pedidos/{idPedido} - deletar pedido")
+    @WithMockUser(username = "cliente@email.com")
     class DeletarUsuario{
         @Test
         @DisplayName("Deve Retornar status 204 No Content quando pedido deletado com sucesso.")
@@ -189,6 +222,7 @@ public class PedidoControllerTest {
 
         @Test
         @DisplayName("Deve Retornar status 404 Not Found quando pedido não existe, para ser deletado.")
+        @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoEntradaInvalidaDeletarPedido() throws Exception {
             Long idPedido = 1L;
 
@@ -204,6 +238,7 @@ public class PedidoControllerTest {
 
         @Test
         @DisplayName("Deve Retornar status 409 Conflict quando pedido está sendo usado por outra tabela.")
+        @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoConflitoDeletarPedido() throws Exception {
             Long idPedido = 1L;
 
@@ -215,6 +250,14 @@ public class PedidoControllerTest {
                     .andExpect(status().isConflict());
 
             verify(pedidoService, times(1)).removePedido(idPedido);
+        }
+        @Test
+        @DisplayName("Deve bloquear a remoção de pedido e retornar 401 quando não for enviado o token")
+        void deletarPedido_semToken_deveRetornarUnauthorized() throws Exception {
+            Long idPedido = 1L;
+            mockMvc.perform(delete("/pedidos/{idPedido}",idPedido)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized()); // Exceção 401
         }
     }
 

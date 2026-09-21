@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
@@ -38,6 +39,7 @@ public class UsuarioControllerTest {
 
         @Test
         @DisplayName("Deve Retornar status 200 OK e Usuário.")
+        @WithMockUser(username = "cliente@email.com")
         void deveBuscarUsuario() throws Exception{
             Long idUsuario = 1L;
             UsuarioResponseDTO usuarioResponseDTO = new UsuarioResponseDTO(1L,"marcos@gmail.com","12345678","Marcos","Rua 10 - RJ");
@@ -56,6 +58,7 @@ public class UsuarioControllerTest {
         }
         @Test
         @DisplayName("Deve Retornar status 404 quando usuário não existir.")
+        @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoBuscarUsuario() throws Exception {
             Long idUsuario = 1L;
 
@@ -67,6 +70,14 @@ public class UsuarioControllerTest {
 
             verify(usuarioService, times(1)).buscaUsuario(idUsuario);
         }
+        @Test
+        @DisplayName("Deve bloquear a busca de usuário e retornar 401 quando não for enviado o token")
+        void buscarUsuario_semToken_deveRetornarUnauthorized() throws Exception {
+            Long idUsuario = 1L;
+            mockMvc.perform(get("/usuarios/{idUsuario}",idUsuario)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized()); // Exceção 401
+        }
     }
     @Nested
     @DisplayName("POST /usuarios - criar usuario")
@@ -74,6 +85,7 @@ public class UsuarioControllerTest {
 
         @Test
         @DisplayName("Deve Retornar status 201 Created e Usuário.")
+        @WithMockUser(username = "cliente@email.com")
         void deveCadastrarUsuario() throws Exception{
             UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com","12345678","Marcos","Rua 10 - RJ");
             UsuarioResponseDTO usuarioResponseDTO = new UsuarioResponseDTO(1L,"marcos@gmail.com","12345678","Marcos","Rua 10 - RJ");
@@ -91,6 +103,7 @@ public class UsuarioControllerTest {
         }
         @Test
         @DisplayName("Deve retornar status 400 Bad Request quando parâmetros for inválido.")
+        @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoEntradaInvalidaCadastraUsuario() throws Exception {
 
             UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("","12345678","Marcos","Rua 10 - RJ");
@@ -103,27 +116,37 @@ public class UsuarioControllerTest {
             verify(usuarioService, never()).cadastrarUsuario(any(UsuarioRequestDTO.class));
 
         }
+        @Test
+        @DisplayName("Deve Retornar status 409 Conflict quando usuario já existe.")
+        @WithMockUser(username = "cliente@email.com")
+        void deveLancarExcecaoConflitoCadastrarUsuario() throws Exception {
+            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com","12345678","Marcos","Rua 10 - RJ");
+
+            when(usuarioService.cadastrarUsuario(usuarioRequestDTO)).thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Já existe um usuário com esse email."));
+
+            mockMvc.perform(post("/usuarios")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(usuarioRequestDTO)))
+                    .andExpect(status().isConflict());
+
+            verify(usuarioService, times(1)).cadastrarUsuario(usuarioRequestDTO);
+        }
+        @Test
+        @DisplayName("Deve bloquear a criação de usuário e retornar 401 quando não for enviado o token")
+        void criarUsuario_semToken_deveRetornarUnauthorized() throws Exception {
+            mockMvc.perform(post("/usuarios")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized()); // Exceção 401
+        }
     }
-    @Test
-    @DisplayName("Deve Retornar status 409 Conflict quando usuario já existe.")
-    void deveLancarExcecaoConflitoCadastrarUsuario() throws Exception {
-        UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com","12345678","Marcos","Rua 10 - RJ");
 
-        when(usuarioService.cadastrarUsuario(usuarioRequestDTO)).thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Já existe um usuário com esse email."));
-
-        mockMvc.perform(post("/usuarios")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(usuarioRequestDTO)))
-                .andExpect(status().isConflict());
-
-        verify(usuarioService, times(1)).cadastrarUsuario(usuarioRequestDTO);
-    }
     @Nested
     @DisplayName("PUT /usuarios/{idUsuario} - editar usuario")
     class EditarUsuario{
 
         @Test
         @DisplayName("Deve Retornar status 200 OK quando usuário atualizado com sucesso.")
+        @WithMockUser(username = "cliente@email.com")
         void deveEditarUsuario() throws Exception {
             Long idUsuario = 1L;
             UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com","12345678","Marcos","Rua 10 - RJ");
@@ -144,6 +167,7 @@ public class UsuarioControllerTest {
         }
         @Test
         @DisplayName("Deve retornar status 400 Bad Request quando parâmetros for inválido.")
+        @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoEntradaInvalidaEditarUsuario() throws Exception {
             Long idUsuario = 1L;
             UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("","12345678","Marcos","Rua 10 - RJ");
@@ -157,6 +181,7 @@ public class UsuarioControllerTest {
         }
         @Test
         @DisplayName("Deve Retornar status 404 Not Found quando usuário não existir.")
+        @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoEditarUsuario() throws Exception {
             Long idUsuario = 1L;
             UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("Marcos","12345678","Marcos","Rua 10 - RJ");
@@ -172,6 +197,7 @@ public class UsuarioControllerTest {
         }
         @Test
         @DisplayName("Deve Retornar status 409 Conflict quando usuário já existe com esse email.")
+        @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoConflitoEditarUsuario() throws Exception {
             Long idUsuario = 1L;
             UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("Marcos","12345678","Marcos","Rua 10 - RJ");
@@ -185,12 +211,21 @@ public class UsuarioControllerTest {
 
             verify(usuarioService, times(1)).editarUsuario(usuarioRequestDTO, idUsuario);
         }
+        @Test
+        @DisplayName("Deve bloquear a edição de usuário e retornar 401 quando não for enviado o token")
+        void editarUsuario_semToken_deveRetornarUnauthorized() throws Exception {
+            Long idUsuario = 1L;
+            mockMvc.perform(put("/usuarios/{idUsuario}",idUsuario)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized()); // Exceção 401
+        }
     }
     @Nested
     @DisplayName("DELETE /usuarios/{idUsuario} - deletar usuario")
     class DeletarUsuario{
         @Test
         @DisplayName("Deve Retornar status 204 No Content quando usuário deletado com sucesso.")
+        @WithMockUser(username = "cliente@email.com")
         void deveDeletarUsuario() throws Exception {
             Long idUsuario = 1L;
 
@@ -205,6 +240,7 @@ public class UsuarioControllerTest {
 
         @Test
         @DisplayName("Deve Retornar status 404 Not Found quando usuário não existe, para ser deletado.")
+        @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoEntradaInvalidaDeletarUsuario() throws Exception {
             Long idUsuario = 1L;
 
@@ -220,6 +256,7 @@ public class UsuarioControllerTest {
 
         @Test
         @DisplayName("Deve Retornar status 409 Conflict quando usuário está sendo usado por outra tabela.")
+        @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoConflitoDeletarUsuario() throws Exception {
             Long idUsuario = 1L;
 
@@ -231,6 +268,14 @@ public class UsuarioControllerTest {
                     .andExpect(status().isConflict());
 
             verify(usuarioService, times(1)).removeUsuario(idUsuario);
+        }
+        @Test
+        @DisplayName("Deve deletar a busca de usuário e retornar 401 quando não for enviado o token")
+        void deletarUsuario_semToken_deveRetornarUnauthorized() throws Exception {
+            Long idUsuario = 1L;
+            mockMvc.perform(delete("/usuarios/{idUsuario}",idUsuario)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized()); // Exceção 401
         }
     }
 

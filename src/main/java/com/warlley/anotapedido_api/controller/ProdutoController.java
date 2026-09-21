@@ -22,7 +22,8 @@ public class ProdutoController {
     @Operation(summary = "Busca um produto.", description = "Recebe um id de um produto como parametro para buscar um produto.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Produto encontrado com sucesso."),
-            @ApiResponse(responseCode = "404", description = "O ID informado não existe no banco de dados..")
+            @ApiResponse(responseCode = "404", description = "O ID informado não existe no banco de dados.."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado")
     })
     @GetMapping("/Produtos/{idProduto}")
     public ProdutoResponseDTO buscarProduto(@PathVariable Long idProduto){
@@ -33,7 +34,9 @@ public class ProdutoController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Produto criado com sucesso."),
             @ApiResponse(responseCode = "400", description = "parametros passado são inválidos."),
-            @ApiResponse(responseCode = "409", description = "conflito: já existe um Produto cadastrado com esse nome.")
+            @ApiResponse(responseCode = "409", description = "conflito: já existe um Produto cadastrado com esse nome."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado"),
+            @ApiResponse(responseCode = "403", description = "Deve retornar 403 Forbidden ao tentar cadastrar produto sendo apenas USER")
     })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/Produtos")
@@ -46,7 +49,9 @@ public class ProdutoController {
             @ApiResponse(responseCode = "200", description = "Produto atualizado com sucesso."),
             @ApiResponse(responseCode = "400", description = "parametros para atualizar o Produto invalido."),
             @ApiResponse(responseCode = "404", description = "Id passado como parametro não encontrado no banco de dados"),
-            @ApiResponse(responseCode = "409", description = "conflito: já existe um Produto cadastrado com esse nome.")})
+            @ApiResponse(responseCode = "409", description = "conflito: já existe um Produto cadastrado com esse nome."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado"),
+            @ApiResponse(responseCode = "403", description = "Deve retornar 403 Forbidden ao tentar cadastrar produto sendo apenas USER")})
     @PutMapping("/Produtos/{idProduto}")
     public ProdutoResponseDTO editarProduto(@Valid @RequestBody ProdutoRequestDTO produtoRequestDTO, @PathVariable Long idProduto){
         return produtoSevice.editarProduto(produtoRequestDTO, idProduto);
@@ -57,7 +62,9 @@ public class ProdutoController {
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Deletado com sucesso."),
             @ApiResponse(responseCode = "404", description = "Produto não existe para ser deletado."),
-            @ApiResponse(responseCode = "409", description = "conflito: bloqueou porque o Produto está sendo usado por outra tabela.")
+            @ApiResponse(responseCode = "409", description = "conflito: bloqueou porque o Produto está sendo usado por outra tabela."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado"),
+            @ApiResponse(responseCode = "403", description = "Deve retornar 403 Forbidden ao tentar cadastrar produto sendo apenas USER")
     })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/Produtos/{idProduto}")

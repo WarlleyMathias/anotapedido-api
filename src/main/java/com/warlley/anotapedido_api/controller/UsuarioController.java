@@ -22,7 +22,8 @@ public class UsuarioController {
     @Operation(summary = "Busca um Usuario.", description = "Recebe um id de um Ususário como parametro para buscar um Usuário.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Usuário encontrado com sucesso."),
-            @ApiResponse(responseCode = "404", description = "O ID informado não existe no banco de dados..")
+            @ApiResponse(responseCode = "404", description = "O ID informado não existe no banco de dados.."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado")
     })
     @GetMapping("/Usuarios/{idUsuario}")
     public UsuarioResponseDTO buscarUsuario(@PathVariable Long idUsuario){
@@ -33,7 +34,8 @@ public class UsuarioController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso."),
             @ApiResponse(responseCode = "400", description = "parametros passado são inválidos."),
-            @ApiResponse(responseCode = "409", description = "conflito: já existe um Usuário cadastrado com esse email.")
+            @ApiResponse(responseCode = "409", description = "conflito: já existe um Usuário cadastrado com esse email."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado")
     })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/Usuarios")
@@ -46,7 +48,8 @@ public class UsuarioController {
             @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso."),
             @ApiResponse(responseCode = "400", description = "parametros para atualizar o Usuário inválido."),
             @ApiResponse(responseCode = "404", description = "Id passado como parametro não encontrado no banco de dados"),
-            @ApiResponse(responseCode = "409", description = "conflito: já existe um Usuário cadastrado com esse nome.")})
+            @ApiResponse(responseCode = "409", description = "conflito: já existe um Usuário cadastrado com esse nome."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado")})
     @PutMapping("/Usuarios/{idUsuario}")
     public UsuarioResponseDTO editarUsuario(@Valid @RequestBody UsuarioRequestDTO usuarioRequestDTO, @PathVariable Long idUsuario){
         return usuarioService.editarUsuario(usuarioRequestDTO, idUsuario);
@@ -56,7 +59,8 @@ public class UsuarioController {
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Deletado com sucesso."),
             @ApiResponse(responseCode = "404", description = "Usuário não existe para ser deletado."),
-            @ApiResponse(responseCode = "409", description = "conflito: bloqueou porque o Usuário está sendo usado por outra tabela.")
+            @ApiResponse(responseCode = "409", description = "conflito: bloqueou porque o Usuário está sendo usado por outra tabela."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado")
     })
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/Usuarios/{idUsuario}")

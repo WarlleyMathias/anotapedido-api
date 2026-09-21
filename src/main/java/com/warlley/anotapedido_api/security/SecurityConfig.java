@@ -34,13 +34,16 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
                         // 2. Rotas do Cardápio / Produtos (Apenas ADMIN altera; USER e ADMIN podem visualizar)
-                        .requestMatchers(HttpMethod.GET, "/produtos/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/produtos/**").hasAnyRole("USER","ADMIN")
                         .requestMatchers(HttpMethod.POST, "/produtos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/produtos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/produtos/**").hasRole("ADMIN")
 
                         // 3. Rotas de Pedidos (Qualquer usuário autenticado pode criar e ver pedidos)
-                        .requestMatchers("/pedidos/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.GET, "/pedidos/**").hasAnyRole("USER","ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/pedidos/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.PUT, "/pedidos/**").hasRole("USER")
+                        .requestMatchers(HttpMethod.DELETE, "/pedidos/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
