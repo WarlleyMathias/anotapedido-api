@@ -25,7 +25,7 @@ public class UsuarioController {
             @ApiResponse(responseCode = "404", description = "O ID informado não existe no banco de dados.."),
             @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado")
     })
-    @GetMapping("/Usuarios/{idUsuario}")
+    @GetMapping("/usuarios/{idUsuario}")
     public UsuarioResponseDTO buscarUsuario(@PathVariable Long idUsuario){
         return usuarioService.buscaUsuario(idUsuario);
     }
@@ -38,9 +38,9 @@ public class UsuarioController {
             @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado")
     })
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/Usuarios")
+    @PostMapping("/usuarios")
     public UsuarioResponseDTO cadastrarUsuario(@Valid @RequestBody UsuarioRequestDTO usuarioRequestDTO){
-        return usuarioService.cadastrarUsuario(usuarioRequestDTO);
+            return usuarioService.cadastrarUsuario(usuarioRequestDTO);
     }
 
     @Operation(summary = "Edita um Usuário.", description = "Recebe um RequestUsuario e um idUsuario como parametro para editar um Usuário.")
@@ -63,7 +63,7 @@ public class UsuarioController {
             @ApiResponse(responseCode = "401", description = "Unauthorized ao tentar cadastrar produto sem estar autenticado")
     })
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/Usuarios/{idUsuario}")
+    @DeleteMapping("/usuarios/{idUsuario}")
     public void removeUsuario(@PathVariable Long idUsuario){
         usuarioService.removeUsuario(idUsuario);
     }

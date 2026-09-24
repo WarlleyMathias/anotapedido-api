@@ -72,7 +72,7 @@ public class ProdutoServiceTest {
         void deveCadastrarProduto(){
             ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("Pizza",10.0f);
             Produto produtoSalvo = new Produto(1L,"Pizza",10.0f);
-            when(produtoRepository.existsByNomeFalse(produtoRequestDTO.nome())).thenReturn(true);
+            when(produtoRepository.existsByNome(produtoRequestDTO.nome())).thenReturn(false);
             when(produtoRepository.save(produtoSalvo));
 
             ProdutoResponseDTO resultado = produtoSevice.cadastrarProduto(produtoRequestDTO);
@@ -82,7 +82,7 @@ public class ProdutoServiceTest {
             assertEquals("Pizza",resultado.nome());
             assertEquals(10.0f,resultado.valor());
 
-            verify(produtoRepository,times(1)).existsByNomeFalse(produtoRequestDTO.nome());
+            verify(produtoRepository,times(1)).existsByNome(produtoRequestDTO.nome());
             verify(produtoRepository,times(1)).save(produtoSalvo);
         }
         @Test
@@ -90,14 +90,14 @@ public class ProdutoServiceTest {
         void deveLancarExcecaoConflitoCadastrarProduto(){
             ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("Pizza",10.0f);
             Produto produtoSalvo = new Produto(1L,"Pizza",10.0f);
-            when(produtoRepository.existsByNomeFalse(produtoRequestDTO.nome())).thenReturn(false);
+            when(produtoRepository.existsByNome(produtoRequestDTO.nome())).thenReturn(true);
 
             ResponseStatusException ex =
                     assertThrows(ResponseStatusException.class, () -> produtoSevice.cadastrarProduto(produtoRequestDTO));
 
             assertEquals(409,ex.getStatusCode().value());
 
-            verify(produtoRepository,times(1)).existsByNomeFalse(produtoRequestDTO.nome());
+            verify(produtoRepository,times(1)).existsByNome(produtoRequestDTO.nome());
             verify(produtoRepository,never()).save(produtoSalvo);
         }
 
@@ -112,7 +112,7 @@ public class ProdutoServiceTest {
             ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("Pizza",10.0f);
             Produto produtoNovo = new Produto(1L,"Pizza",10.0f);
             when(produtoRepository.existsById(idProduto)).thenReturn(true);
-            when(produtoRepository.existsByNomeFalse(produtoRequestDTO.nome())).thenReturn(true);
+            when(produtoRepository.existsByNome(produtoRequestDTO.nome())).thenReturn(false);
             when(produtoRepository.save(produtoNovo));
 
             ProdutoResponseDTO resultado = produtoSevice.editarProduto(produtoRequestDTO,idProduto);
@@ -123,7 +123,7 @@ public class ProdutoServiceTest {
             assertEquals(10.0f,resultado.valor());
 
             verify(produtoRepository,times(1)).existsById(idProduto);
-            verify(produtoRepository,times(1)).existsByNomeFalse(produtoRequestDTO.nome());
+            verify(produtoRepository,times(1)).existsByNome(produtoRequestDTO.nome());
             verify(produtoRepository,times(1)).save(produtoNovo);
         }
         @Test
@@ -138,7 +138,7 @@ public class ProdutoServiceTest {
             assertEquals(404,ex.getStatusCode().value());
 
             verify(produtoRepository,times(1)).existsById(idProduto);
-            verify(produtoRepository,never()).existsByNomeFalse(any(ProdutoRequestDTO.class).nome());
+            verify(produtoRepository,never()).existsByNome(any(ProdutoRequestDTO.class).nome());
             verify(produtoRepository,never()).save(any(Produto.class));
         }
         @Test
@@ -148,7 +148,7 @@ public class ProdutoServiceTest {
             ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("Pizza",10.0f);
             when(produtoRepository.existsById(idProduto)).thenReturn(true);
             when(produtoSevice.buscarProduto(idProduto).nome().equals(produtoRequestDTO.nome())).thenReturn(false);
-            when(produtoRepository.existsByNomeFalse(produtoRequestDTO.nome())).thenReturn(false);
+            when(produtoRepository.existsByNome(produtoRequestDTO.nome())).thenReturn(true);
 
 
             ResponseStatusException ex =
@@ -157,7 +157,7 @@ public class ProdutoServiceTest {
             assertEquals(409,ex.getStatusCode().value());
 
             verify(produtoRepository,times(1)).existsById(idProduto);
-            verify(produtoRepository,times(1)).existsByNomeFalse(produtoRequestDTO.nome());
+            verify(produtoRepository,times(1)).existsByNome(produtoRequestDTO.nome());
             verify(produtoRepository,never()).save(any(Produto.class));
         }
 

@@ -1,4 +1,4 @@
-package com.warlley.anotapedido_api.service;
+package com.warlley.anotapedido_api.service.authenticatonService;
 
 import com.warlley.anotapedido_api.model.Usuario;
 import io.jsonwebtoken.Jwts;

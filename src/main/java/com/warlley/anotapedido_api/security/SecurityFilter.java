@@ -2,7 +2,7 @@ package com.warlley.anotapedido_api.security;
 
 import com.warlley.anotapedido_api.model.Usuario;
 import com.warlley.anotapedido_api.repository.UsuarioRepository;
-import com.warlley.anotapedido_api.service.TokenService;
+import com.warlley.anotapedido_api.service.authenticatonService.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

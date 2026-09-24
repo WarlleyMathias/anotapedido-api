@@ -21,20 +21,23 @@ public class ProdutoSevice {
     }
     public ProdutoResponseDTO cadastrarProduto(ProdutoRequestDTO produtoRequestDTO){
         Produto produtoNovo = new Produto(produtoRequestDTO);
-        if (produtoRepository.existsByNomeFalse(produtoRequestDTO.nome())) {
-            return new ProdutoResponseDTO(produtoRepository.save(produtoNovo));
+        if (produtoRepository.existsByNome(produtoRequestDTO.nome())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Já existe um Produto com esse nome.");
         }
-        throw new ResponseStatusException(HttpStatus.CONFLICT,"Já existe um Produto com esse nome.");
+        return new ProdutoResponseDTO(produtoRepository.save(produtoNovo));
     }
     public ProdutoResponseDTO editarProduto(ProdutoRequestDTO produtoRequestDTO, Long idProduto){
         Produto produtoNovo = new Produto(produtoRequestDTO);
         if (produtoRepository.existsById(idProduto)){
-            if (produtoRepository.existsByNomeFalse(produtoRequestDTO.nome()) || produtoRequestDTO.nome().equals(buscarProduto(idProduto).nome())) {
-                return new ProdutoResponseDTO(produtoRepository.save(produtoNovo));
+            if(produtoRepository.existsByNome(produtoRequestDTO.nome())) {
+                if (produtoRequestDTO.nome().equals(buscarProduto(idProduto).nome())) {
+                    return new ProdutoResponseDTO(produtoRepository.save(produtoNovo));
+                }
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe um Produto com esse nome.");
             }
-            throw new ResponseStatusException(HttpStatus.CONFLICT,"Já existe um Produto com esse nome.");
+            return new ProdutoResponseDTO(produtoRepository.save(produtoNovo));
         }
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Produto não encontrado, para editar.");
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Produto não encontrado, para editar.");
     }
     public void removeProduto(Long idProduto){
         if (produtoRepository.existsById(idProduto)){

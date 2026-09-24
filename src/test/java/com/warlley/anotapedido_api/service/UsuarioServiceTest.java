@@ -3,6 +3,7 @@ package com.warlley.anotapedido_api.service;
 import com.warlley.anotapedido_api.dto.UsuarioRequestDTO;
 import com.warlley.anotapedido_api.dto.UsuarioResponseDTO;
 import com.warlley.anotapedido_api.model.Usuario;
+import com.warlley.anotapedido_api.model.enums.UserRole;
 import com.warlley.anotapedido_api.repository.UsuarioRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -37,7 +38,7 @@ public class UsuarioServiceTest {
         @DisplayName("Deve retornar 200 OK e retornar um usuário.")
         void deveBuscarUsuario(){
             Long idUsusario = 1L;
-            Usuario usuarioSave = new Usuario(1L,"marcos@gmail.com" ,"12345678", "Marcos", "Rua 10 - RJ");
+            Usuario usuarioSave = new Usuario(1L,"marcos@gmail.com" ,"12345678", "Marcos", "Rua 10 - RJ", UserRole.USER);
             when(usuarioRepository.existsById(idUsusario)).thenReturn(true);
             when(usuarioRepository.findById(idUsusario)).thenReturn(Optional.of(usuarioSave));
 
@@ -49,6 +50,7 @@ public class UsuarioServiceTest {
             assertEquals("12345678",resultado.senha());
             assertEquals("Marcos",resultado.nome());
             assertEquals("Rua 10 - RJ",resultado.endereco());
+            assertEquals(UserRole.USER,resultado.role());
 
             verify(usuarioRepository,times(1)).existsById(idUsusario);
             verify(usuarioRepository, times(1)).findById(idUsusario);
@@ -79,8 +81,8 @@ public class UsuarioServiceTest {
         @DisplayName("Deve Retornar status 201 Created e Usuário.")
         void deveCadastrarUsuario() {
             UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ");
-            Usuario usuarioSave = new Usuario(1L, "marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ");
-            when(usuarioRepository.existsByEmailFalse(usuarioRequestDTO.email())).thenReturn(true);
+            Usuario usuarioSave = new Usuario(1L, "marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ", UserRole.USER);
+            when(usuarioRepository.existsByEmail(usuarioRequestDTO.email())).thenReturn(false);
             when(usuarioRepository.save(usuarioSave)).thenReturn(usuarioSave);
 
             UsuarioResponseDTO resultado = usuarioService.cadastrarUsuario(usuarioRequestDTO);
@@ -91,8 +93,9 @@ public class UsuarioServiceTest {
             assertEquals("12345678", resultado.senha());
             assertEquals("Marcos", resultado.nome());
             assertEquals("Rua 10 - RJ", resultado.endereco());
+            assertEquals(UserRole.USER,resultado.role());
 
-            verify(usuarioRepository, times(1)).existsByEmailFalse(usuarioRequestDTO.email());
+            verify(usuarioRepository, times(1)).existsByEmail(usuarioRequestDTO.email());
             verify(usuarioRepository, times(1)).save(usuarioSave);
 
         }
@@ -102,15 +105,15 @@ public class UsuarioServiceTest {
         void deveLancarExcecaoConflitoCadastrarUsuario() {
 
             UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ");
-            Usuario usuarioSave = new Usuario(1L, "marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ");
-            when(usuarioRepository.existsByEmailFalse(usuarioRequestDTO.email())).thenReturn(false);
+            Usuario usuarioSave = new Usuario(1L, "marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ", UserRole.USER);
+            when(usuarioRepository.existsByEmail(usuarioRequestDTO.email())).thenReturn(true);
 
             ResponseStatusException ex =
                     assertThrows(ResponseStatusException.class, () -> usuarioService.cadastrarUsuario(usuarioRequestDTO));
 
             assertEquals(409, ex.getStatusCode().value());
 
-            verify(usuarioRepository, times(1)).existsByEmailFalse(usuarioRequestDTO.email());
+            verify(usuarioRepository, times(1)).existsByEmail(usuarioRequestDTO.email());
             verify(usuarioRepository, never()).save(usuarioSave);
         }
     }
@@ -123,9 +126,9 @@ public class UsuarioServiceTest {
         void deveEditarUsuario(){
             Long idUsusario = 1L;
             UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ");
-            Usuario usuarioSave = new Usuario(1L, "marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ");
+            Usuario usuarioSave = new Usuario(1L, "marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ", UserRole.USER);
             when(usuarioRepository.existsById(idUsusario)).thenReturn(true);
-            when(usuarioRepository.existsByEmailFalse(usuarioRequestDTO.email())).thenReturn(true);
+            when(usuarioRepository.existsByEmail(usuarioRequestDTO.email())).thenReturn(false);
             when(usuarioRepository.save(usuarioSave)).thenReturn(usuarioSave);
 
             UsuarioResponseDTO resultado = usuarioService.editarUsuario(usuarioRequestDTO, idUsusario);
@@ -136,9 +139,10 @@ public class UsuarioServiceTest {
             assertEquals("12345678", resultado.senha());
             assertEquals("Marcos", resultado.nome());
             assertEquals("Rua 10 - RJ", resultado.endereco());
+            assertEquals(UserRole.USER,resultado.role());
 
             verify(usuarioRepository, times(1)).existsById(idUsusario);
-            verify(usuarioRepository, times(1)).existsByEmailFalse(usuarioRequestDTO.email());
+            verify(usuarioRepository, times(1)).existsByEmail(usuarioRequestDTO.email());
             verify(usuarioRepository, times(1)).save(usuarioSave);
 
         }
@@ -156,7 +160,7 @@ public class UsuarioServiceTest {
             assertEquals(404, ex.getStatusCode().value());
 
             verify(usuarioRepository, times(1)).existsById(idUsusario);
-            verify(usuarioRepository, never()).existsByEmailFalse(usuarioRequestDTO.email());
+            verify(usuarioRepository, never()).existsByEmail(usuarioRequestDTO.email());
             verify(usuarioRepository, never()).save(any(Usuario.class));
         }
         @Test
@@ -166,7 +170,7 @@ public class UsuarioServiceTest {
             UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ");
 
             when(usuarioRepository.existsById(idUsusario)).thenReturn(true);
-            when(usuarioRepository.existsByEmailFalse(usuarioRequestDTO.email())).thenReturn(false);
+            when(usuarioRepository.existsByEmail(usuarioRequestDTO.email())).thenReturn(true);
             when(usuarioService.buscaUsuario(idUsusario).email().equals(usuarioRequestDTO.email())).thenReturn(false);
 
             ResponseStatusException ex =
@@ -175,7 +179,7 @@ public class UsuarioServiceTest {
             assertEquals(409, ex.getStatusCode().value());
 
             verify(usuarioRepository, times(1)).existsById(idUsusario);
-            verify(usuarioRepository, times(1)).existsByEmailFalse(usuarioRequestDTO.email());
+            verify(usuarioRepository, times(1)).existsByEmail(usuarioRequestDTO.email());
             verify(usuarioService, times(1)).buscaUsuario(idUsusario);
             verify(usuarioRepository, never()).save(any(Usuario.class));
         }
