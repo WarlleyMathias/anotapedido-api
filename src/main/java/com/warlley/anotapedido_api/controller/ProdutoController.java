@@ -12,12 +12,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @Tag(name = "Produtos", description = "Endpoints para gerenciar os Produtos.")
 public class ProdutoController {
 
     private final ProdutoSevice produtoSevice;
+
+    @Operation(summary = "Busca um produto.", description = "Recebe um id de um produto como parametro para buscar um produto.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de Produtos encontrado com sucesso.")
+    })
+    @GetMapping("/Produtos")
+    public List<ProdutoResponseDTO> buscarTodosProduto(){
+        return produtoSevice.buscarTodosProduto();
+    }
 
     @Operation(summary = "Busca um produto.", description = "Recebe um id de um produto como parametro para buscar um produto.")
     @ApiResponses({
