@@ -1,7 +1,10 @@
 package com.warlley.anotapedido_api.controller;
 
+import com.warlley.anotapedido_api.dto.EnderecoRequestDTO;
 import com.warlley.anotapedido_api.dto.UsuarioRequestDTO;
 import com.warlley.anotapedido_api.dto.UsuarioResponseDTO;
+import com.warlley.anotapedido_api.model.Endereco;
+import com.warlley.anotapedido_api.model.enums.UserRole;
 import com.warlley.anotapedido_api.service.UsuarioService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,6 +18,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -42,7 +48,8 @@ public class UsuarioControllerTest {
         @WithMockUser(username = "cliente@email.com")
         void deveBuscarUsuario() throws Exception{
             Long idUsuario = 1L;
-            UsuarioResponseDTO usuarioResponseDTO = new UsuarioResponseDTO(1L,"marcos@gmail.com","12345678","Marcos","Rua 10 - RJ");
+            List<Endereco> enderecos = new ArrayList<>();
+            UsuarioResponseDTO usuarioResponseDTO = new UsuarioResponseDTO(1L,"marcos@gmail.com","12345678","Marcos",enderecos, UserRole.USER);
             when(usuarioService.buscaUsuario(idUsuario)).thenReturn(usuarioResponseDTO);
 
             mockMvc.perform(get("/usuarios/{idUsuario}", idUsuario)
@@ -52,7 +59,7 @@ public class UsuarioControllerTest {
                     .andExpect(jsonPath("$.email").value("marcos@gmail.com"))
                     .andExpect(jsonPath("$.senha").value("12345678"))
                     .andExpect(jsonPath("$.nome").value("Marcos"))
-                    .andExpect(jsonPath("$.endereco").value("Rua 10 - RJ"));
+                    .andExpect(jsonPath("$.endereco").value(enderecos));
 
             verify(usuarioService, times(1)).buscaUsuario(idUsuario);
         }
@@ -87,8 +94,10 @@ public class UsuarioControllerTest {
         @DisplayName("Deve Retornar status 201 Created e Usuário.")
         @WithMockUser(username = "cliente@email.com")
         void deveCadastrarUsuario() throws Exception{
-            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com","12345678","Marcos","Rua 10 - RJ");
-            UsuarioResponseDTO usuarioResponseDTO = new UsuarioResponseDTO(1L,"marcos@gmail.com","12345678","Marcos","Rua 10 - RJ");
+            List<Endereco> enderecos = new ArrayList<>();
+            List<EnderecoRequestDTO> enderecoRequestDTO = new ArrayList<>();
+            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com","12345678","Marcos",enderecoRequestDTO);
+            UsuarioResponseDTO usuarioResponseDTO = new UsuarioResponseDTO(1L,"marcos@gmail.com","12345678","Marcos",enderecos, UserRole.USER);
             when(usuarioService.cadastrarUsuario(usuarioRequestDTO)).thenReturn(usuarioResponseDTO);
 
             mockMvc.perform(post("/usuarios")
@@ -97,7 +106,7 @@ public class UsuarioControllerTest {
                     .andExpect(jsonPath("$.email").value("marcos@gmail.com"))
                     .andExpect(jsonPath("$.senha").value("12345678"))
                     .andExpect(jsonPath("$.nome").value("Marcos"))
-                    .andExpect(jsonPath("$.endereco").value("Rua 10 - RJ"));
+                    .andExpect(jsonPath("$.endereco").value(enderecos));
 
             verify(usuarioService, times(1)).cadastrarUsuario(usuarioRequestDTO);
         }
@@ -105,8 +114,8 @@ public class UsuarioControllerTest {
         @DisplayName("Deve retornar status 400 Bad Request quando parâmetros for inválido.")
         @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoEntradaInvalidaCadastraUsuario() throws Exception {
-
-            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("","12345678","Marcos","Rua 10 - RJ");
+            List<EnderecoRequestDTO> enderecoRequestDTO = new ArrayList<>();
+            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("","12345678","Marcos",enderecoRequestDTO);
 
             mockMvc.perform(post("/usuarios")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -120,7 +129,8 @@ public class UsuarioControllerTest {
         @DisplayName("Deve Retornar status 409 Conflict quando usuario já existe.")
         @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoConflitoCadastrarUsuario() throws Exception {
-            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com","12345678","Marcos","Rua 10 - RJ");
+            List<EnderecoRequestDTO> enderecoRequestDTO = new ArrayList<>();
+            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com","12345678","Marcos",enderecoRequestDTO);
 
             when(usuarioService.cadastrarUsuario(usuarioRequestDTO)).thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Já existe um usuário com esse email."));
 
@@ -149,8 +159,10 @@ public class UsuarioControllerTest {
         @WithMockUser(username = "cliente@email.com")
         void deveEditarUsuario() throws Exception {
             Long idUsuario = 1L;
-            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com","12345678","Marcos","Rua 10 - RJ");
-            UsuarioResponseDTO usuarioAtualizado = new UsuarioResponseDTO(1L,"marcos@gmail.com","12345678","Marcos","Rua 10 - RJ");
+            List<Endereco> enderecos = new ArrayList<>();
+            List<EnderecoRequestDTO> enderecoRequestDTO = new ArrayList<>();
+            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com","12345678","Marcos",enderecoRequestDTO);
+            UsuarioResponseDTO usuarioAtualizado = new UsuarioResponseDTO(1L,"marcos@gmail.com","12345678","Marcos",enderecos, UserRole.USER);
 
             when(usuarioService.editarUsuario(usuarioRequestDTO, idUsuario)).thenReturn(usuarioAtualizado);
 
@@ -161,7 +173,7 @@ public class UsuarioControllerTest {
                     .andExpect(jsonPath("$.email").value("marcos@gmail.com"))
                     .andExpect(jsonPath("$.senha").value("12345678"))
                     .andExpect(jsonPath("$.nome").value("Marcos"))
-                    .andExpect(jsonPath("$.endereco").value("Rua 10 - RJ"));
+                    .andExpect(jsonPath("$.endereco").value(enderecos));
 
             verify(usuarioService, times(1)).editarUsuario(usuarioRequestDTO, idUsuario);
         }
@@ -170,7 +182,8 @@ public class UsuarioControllerTest {
         @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoEntradaInvalidaEditarUsuario() throws Exception {
             Long idUsuario = 1L;
-            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("","12345678","Marcos","Rua 10 - RJ");
+            List<EnderecoRequestDTO> enderecoRequestDTO = new ArrayList<>();
+            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("","12345678","Marcos",enderecoRequestDTO);
 
             mockMvc.perform(put("/usuarios/{idUsuario}", idUsuario)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -184,7 +197,8 @@ public class UsuarioControllerTest {
         @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoEditarUsuario() throws Exception {
             Long idUsuario = 1L;
-            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("Marcos","12345678","Marcos","Rua 10 - RJ");
+            List<EnderecoRequestDTO> enderecoRequestDTO = new ArrayList<>();
+            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("Marcos","12345678","Marcos",enderecoRequestDTO);
 
             when(usuarioService.editarUsuario(usuarioRequestDTO, idUsuario)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "produto não existe para sem atualizado."));
 
@@ -200,7 +214,8 @@ public class UsuarioControllerTest {
         @WithMockUser(username = "cliente@email.com")
         void deveLancarExcecaoConflitoEditarUsuario() throws Exception {
             Long idUsuario = 1L;
-            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("Marcos","12345678","Marcos","Rua 10 - RJ");
+            List<EnderecoRequestDTO> enderecoRequestDTO = new ArrayList<>();
+            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("Marcos","12345678","Marcos",enderecoRequestDTO);
 
             when(usuarioService.editarUsuario(usuarioRequestDTO, idUsuario)).thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Já existe um usuário com esse nome."));
 

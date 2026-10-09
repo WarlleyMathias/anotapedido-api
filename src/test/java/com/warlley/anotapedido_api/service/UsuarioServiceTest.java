@@ -1,7 +1,9 @@
 package com.warlley.anotapedido_api.service;
 
+import com.warlley.anotapedido_api.dto.EnderecoRequestDTO;
 import com.warlley.anotapedido_api.dto.UsuarioRequestDTO;
 import com.warlley.anotapedido_api.dto.UsuarioResponseDTO;
+import com.warlley.anotapedido_api.model.Endereco;
 import com.warlley.anotapedido_api.model.Usuario;
 import com.warlley.anotapedido_api.model.enums.UserRole;
 import com.warlley.anotapedido_api.repository.UsuarioRepository;
@@ -14,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
@@ -38,7 +42,8 @@ public class UsuarioServiceTest {
         @DisplayName("Deve retornar 200 OK e retornar um usuário.")
         void deveBuscarUsuario(){
             Long idUsusario = 1L;
-            Usuario usuarioSave = new Usuario(1L,"marcos@gmail.com" ,"12345678", "Marcos", "Rua 10 - RJ", UserRole.USER);
+            List<Endereco> enderecos = new ArrayList<>();
+            Usuario usuarioSave = new Usuario(1L,"marcos@gmail.com" ,"12345678", "Marcos", enderecos, UserRole.USER);
             when(usuarioRepository.existsById(idUsusario)).thenReturn(true);
             when(usuarioRepository.findById(idUsusario)).thenReturn(Optional.of(usuarioSave));
 
@@ -49,7 +54,7 @@ public class UsuarioServiceTest {
             assertEquals("marcos@gmail.com",resultado.email());
             assertEquals("12345678",resultado.senha());
             assertEquals("Marcos",resultado.nome());
-            assertEquals("Rua 10 - RJ",resultado.endereco());
+            assertEquals(enderecos,resultado.enderecos());
             assertEquals(UserRole.USER,resultado.role());
 
             verify(usuarioRepository,times(1)).existsById(idUsusario);
@@ -80,8 +85,10 @@ public class UsuarioServiceTest {
         @Test
         @DisplayName("Deve Retornar status 201 Created e Usuário.")
         void deveCadastrarUsuario() {
-            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ");
-            Usuario usuarioSave = new Usuario(1L, "marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ", UserRole.USER);
+            List<Endereco> enderecos = new ArrayList<>();
+            List<EnderecoRequestDTO> enderecoRequestDTO = new ArrayList<>();
+            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com", "12345678", "Marcos", enderecoRequestDTO);
+            Usuario usuarioSave = new Usuario(1L, "marcos@gmail.com", "12345678", "Marcos", enderecos, UserRole.USER);
             when(usuarioRepository.existsByEmail(usuarioRequestDTO.email())).thenReturn(false);
             when(usuarioRepository.save(usuarioSave)).thenReturn(usuarioSave);
 
@@ -92,7 +99,7 @@ public class UsuarioServiceTest {
             assertEquals("marcos@gmail.com", resultado.email());
             assertEquals("12345678", resultado.senha());
             assertEquals("Marcos", resultado.nome());
-            assertEquals("Rua 10 - RJ", resultado.endereco());
+            assertEquals(enderecos, resultado.enderecos());
             assertEquals(UserRole.USER,resultado.role());
 
             verify(usuarioRepository, times(1)).existsByEmail(usuarioRequestDTO.email());
@@ -103,9 +110,10 @@ public class UsuarioServiceTest {
         @Test
         @DisplayName("Deve Retornar status 409 Conflict quando usuario já existe.")
         void deveLancarExcecaoConflitoCadastrarUsuario() {
-
-            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ");
-            Usuario usuarioSave = new Usuario(1L, "marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ", UserRole.USER);
+            List<Endereco> enderecos = new ArrayList<>();
+            List<EnderecoRequestDTO> enderecoRequestDTO = new ArrayList<>();
+            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com", "12345678", "Marcos", enderecoRequestDTO);
+            Usuario usuarioSave = new Usuario(1L, "marcos@gmail.com", "12345678", "Marcos", enderecos, UserRole.USER);
             when(usuarioRepository.existsByEmail(usuarioRequestDTO.email())).thenReturn(true);
 
             ResponseStatusException ex =
@@ -125,8 +133,10 @@ public class UsuarioServiceTest {
         @DisplayName("Deve Retornar status 200 OK quando usuário atualizado com sucesso.")
         void deveEditarUsuario(){
             Long idUsusario = 1L;
-            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ");
-            Usuario usuarioSave = new Usuario(1L, "marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ", UserRole.USER);
+            List<Endereco> enderecos = new ArrayList<>();
+            List<EnderecoRequestDTO> enderecoRequestDTO = new ArrayList<>();
+            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com", "12345678", "Marcos", enderecoRequestDTO);
+            Usuario usuarioSave = new Usuario(1L, "marcos@gmail.com", "12345678", "Marcos", enderecos, UserRole.USER);
             when(usuarioRepository.existsById(idUsusario)).thenReturn(true);
             when(usuarioRepository.existsByEmail(usuarioRequestDTO.email())).thenReturn(false);
             when(usuarioRepository.save(usuarioSave)).thenReturn(usuarioSave);
@@ -138,7 +148,7 @@ public class UsuarioServiceTest {
             assertEquals("marcos@gmail.com", resultado.email());
             assertEquals("12345678", resultado.senha());
             assertEquals("Marcos", resultado.nome());
-            assertEquals("Rua 10 - RJ", resultado.endereco());
+            assertEquals(enderecos, resultado.enderecos());
             assertEquals(UserRole.USER,resultado.role());
 
             verify(usuarioRepository, times(1)).existsById(idUsusario);
@@ -150,7 +160,8 @@ public class UsuarioServiceTest {
         @DisplayName("Deve Retornar status 404 Not Found quando usuário não existir.")
         void deveLancarExcecaoEditarUsuario(){
             Long idUsusario = 1L;
-            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ");
+            List<EnderecoRequestDTO> enderecoRequestDTO = new ArrayList<>();
+            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com", "12345678", "Marcos", enderecoRequestDTO);
 
             when(usuarioRepository.existsById(idUsusario)).thenReturn(false);
 
@@ -167,7 +178,8 @@ public class UsuarioServiceTest {
         @DisplayName("Deve Retornar status 409 Conflict quando usuário já existe com esse email.")
         void deveLancarExcecaoConflitoEditarUsuario(){
             Long idUsusario = 1L;
-            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com", "12345678", "Marcos", "Rua 10 - RJ");
+            List<EnderecoRequestDTO> enderecoRequestDTO = new ArrayList<>();
+            UsuarioRequestDTO usuarioRequestDTO = new UsuarioRequestDTO("marcos@gmail.com", "12345678", "Marcos", enderecoRequestDTO);
 
             when(usuarioRepository.existsById(idUsusario)).thenReturn(true);
             when(usuarioRepository.existsByEmail(usuarioRequestDTO.email())).thenReturn(true);
