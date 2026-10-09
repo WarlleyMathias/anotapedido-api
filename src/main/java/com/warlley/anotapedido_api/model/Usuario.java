@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -25,7 +26,10 @@ public class Usuario implements UserDetails {
     private String email;
     private String senha;
     private String nome;
-    private String endereco;
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Endereco> enderecos = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserRole role; // Define se é ADMIN ou USER
@@ -33,8 +37,17 @@ public class Usuario implements UserDetails {
     public Usuario(UsuarioRequestDTO usuarioRequestDTO){
         this.email = usuarioRequestDTO.email();
         this.nome  = usuarioRequestDTO.nome();
-        this.endereco = usuarioRequestDTO.endereco();
         this.senha = usuarioRequestDTO.senha();
+    }
+
+    public void adicionarEndereco(Endereco endereco) {
+        enderecos.add(endereco);
+        endereco.setUsuario(this);
+    }
+
+    public void removerEndereco(Endereco endereco) {
+        enderecos.remove(endereco);
+        endereco.setUsuario(null);
     }
 
     @Override

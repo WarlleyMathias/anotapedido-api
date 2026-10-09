@@ -1,6 +1,9 @@
 package com.warlley.anotapedido_api.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+
+import java.util.List;
 
 public record UsuarioRequestDTO(
         @Email
@@ -12,8 +15,7 @@ public record UsuarioRequestDTO(
         @Size(min = 2, message = "A nome deve ter no mínimo 2")
         @NotBlank(message = "O campo nome não pode está vazio.")
         String nome,
-        @NotBlank(message = "O campo endereco não pode está vazio.")
-        @Pattern(regexp = "^[^@]*$", message = "O endereço não pode conter o caractere '@'")
-        String endereco
+        @Valid
+        List<EnderecoRequestDTO> enderecos
 
 ) {}
