@@ -2,6 +2,7 @@ package com.warlley.anotapedido_api.controller;
 
 import com.warlley.anotapedido_api.dto.ProdutoRequestDTO;
 import com.warlley.anotapedido_api.dto.ProdutoResponseDTO;
+import com.warlley.anotapedido_api.model.Categoria;
 import com.warlley.anotapedido_api.service.ProdutoSevice;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,15 +45,19 @@ public class ProdutoControllerTest {
         @WithMockUser(username = "cliente@email.com")
         void deveBuscarProduto() throws Exception{
             Long idProduto = 1L;
-            ProdutoResponseDTO usuarioResponseDTO = new ProdutoResponseDTO(1L,"lanche",10.0f);
-            when(produtoService.buscarProduto(idProduto)).thenReturn(usuarioResponseDTO);
+            Categoria categoria = new Categoria(1L, "Pizza");
+            ProdutoResponseDTO produtoResponseDTO = new ProdutoResponseDTO(1L,"lanche",10.0f,"https://meusite.com/imagens/hamburguer.jpg", categoria, "top");
+            when(produtoService.buscarProduto(idProduto)).thenReturn(produtoResponseDTO);
 
             mockMvc.perform(get("/produtos/{idProduto}", idProduto)
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.idProduto").value(1))
                     .andExpect(jsonPath("$.nome").value("lanche"))
-                    .andExpect(jsonPath("$.senha").value(10.0f));
+                    .andExpect(jsonPath("$.senha").value(10.0f))
+                    .andExpect(jsonPath("$.imagemUrl").value("https://meusite.com/imagens/hamburguer.jpg"))
+                    .andExpect(jsonPath("$.categoria").value(categoria))
+                    .andExpect(jsonPath("$.descricao").value("top"));
 
             verify(produtoService, times(1)).buscarProduto(idProduto);
         }
@@ -87,15 +92,19 @@ public class ProdutoControllerTest {
         @DisplayName("Deve Retornar status 201 Created e produto.")
         @WithMockUser(username = "cliente@email.com", roles = {"ADMIN"})
         void deveCadastrarProduto() throws Exception {
-            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche", 10.0f);
-            ProdutoResponseDTO usuarioResponseDTO = new ProdutoResponseDTO(1L, "lanche", 10.0f);
-            when(produtoService.cadastrarProduto(produtoRequestDTO)).thenReturn(usuarioResponseDTO);
+            Categoria categoria = new Categoria(1L, "Pizza");
+            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche", 10.0f, "https://meusite.com/imagens/hamburguer.jpg", 1L, "top");
+            ProdutoResponseDTO produtoResponseDTO = new ProdutoResponseDTO(1L, "lanche", 10.0f, "https://meusite.com/imagens/hamburguer.jpg", categoria, "top");
+            when(produtoService.cadastrarProduto(produtoRequestDTO)).thenReturn(produtoResponseDTO);
 
             mockMvc.perform(post("/produtos")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.nome").value("lanche"))
-                    .andExpect(jsonPath("$.senha").value(10.0f));
+                    .andExpect(jsonPath("$.senha").value(10.0f))
+                    .andExpect(jsonPath("$.imagemUrl").value("https://meusite.com/imagens/hamburguer.jpg"))
+                    .andExpect(jsonPath("$.categoria").value(categoria))
+                    .andExpect(jsonPath("$.descricao").value("top"));
 
             verify(produtoService, times(1)).cadastrarProduto(produtoRequestDTO);
         }
@@ -105,7 +114,7 @@ public class ProdutoControllerTest {
         @WithMockUser(username = "cliente@email.com", roles = {"ADMIN"})
         void deveLancarExcecaoEntradaInvalidaCadastraProduto() throws Exception {
 
-            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("", 10.0f);
+            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("", 10.0f, "https://meusite.com/imagens/hamburguer.jpg", 1L, "top");
 
             mockMvc.perform(post("/produtos")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -118,7 +127,7 @@ public class ProdutoControllerTest {
         @DisplayName("Deve Retornar status 409 Conflict quando produto já existe.")
         @WithMockUser(username = "cliente@email.com", roles = {"ADMIN"})
         void deveLancarExcecaoConflitoCadastrarProduto() throws Exception {
-            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche", 10.0f);
+            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche", 10.0f, "https://meusite.com/imagens/hamburguer.jpg", 1L, "top");
 
             when(produtoService.cadastrarProduto(produtoRequestDTO)).thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Já existe um produto com esse nome."));
 
@@ -140,7 +149,7 @@ public class ProdutoControllerTest {
         @DisplayName("Deve retornar 403 Forbidden ao tentar cadastrar produto sendo apenas USER")
         @WithMockUser(username = "cliente@email.com")
         void cadastrarProduto_comRoleUser_deveRetornarForbidden() throws Exception {
-            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche", 10.0f);
+            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche", 10.0f, "https://meusite.com/imagens/hamburguer.jpg", 1L, "top");
             mockMvc.perform(post("/produtos")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(produtoRequestDTO)))
@@ -156,8 +165,9 @@ public class ProdutoControllerTest {
         @WithMockUser(username = "cliente@email.com", roles = {"ADMIN"})
         void deveEditarProduto() throws Exception {
             Long idProduto = 1L;
-            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche",10.0f);
-            ProdutoResponseDTO produtoAtualizado = new ProdutoResponseDTO(1L,"lanche",10.0f);
+            Categoria categoria = new Categoria(1L, "Pizza");
+            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche",10.0f, "https://meusite.com/imagens/hamburguer.jpg", 1L, "top");
+            ProdutoResponseDTO produtoAtualizado = new ProdutoResponseDTO(1L,"lanche",10.0f, "https://meusite.com/imagens/hamburguer.jpg", categoria, "top");
 
             when(produtoService.editarProduto(produtoRequestDTO, idProduto)).thenReturn(produtoAtualizado);
 
@@ -166,7 +176,10 @@ public class ProdutoControllerTest {
                             .content(objectMapper.writeValueAsString(produtoRequestDTO)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.nome").value("lanche"))
-                    .andExpect(jsonPath("$.senha").value(10.0f));
+                    .andExpect(jsonPath("$.senha").value(10.0f))
+                    .andExpect(jsonPath("$.imagemUrl").value("https://meusite.com/imagens/hamburguer.jpg"))
+                    .andExpect(jsonPath("$.categoria").value(categoria))
+                    .andExpect(jsonPath("$.descricao").value("top"));
 
             verify(produtoService, times(1)).editarProduto(produtoRequestDTO, idProduto);
         }
@@ -175,7 +188,7 @@ public class ProdutoControllerTest {
         @WithMockUser(username = "cliente@email.com", roles = {"ADMIN"})
         void deveLancarExcecaoEntradaInvalidaEditarProduto() throws Exception {
             Long idProduto = 1L;
-            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("",10.0f);
+            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("",10.0f, "https://meusite.com/imagens/hamburguer.jpg", 1L, "top");
 
             mockMvc.perform(put("/produtos/{idProduto}", idProduto)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -189,7 +202,7 @@ public class ProdutoControllerTest {
         @WithMockUser(username = "cliente@email.com", roles = {"ADMIN"})
         void deveLancarExcecaoEditarProduto() throws Exception {
             Long idProduto = 1L;
-            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche",10.0f);
+            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche",10.0f, "https://meusite.com/imagens/hamburguer.jpg", 1L, "top");
 
             when(produtoService.editarProduto(produtoRequestDTO, idProduto)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não existe para sem atualizado."));
 
@@ -205,7 +218,7 @@ public class ProdutoControllerTest {
         @WithMockUser(username = "cliente@email.com", roles = {"ADMIN"})
         void deveLancarExcecaoConflitoEditarProduto() throws Exception {
             Long idProduto = 1L;
-            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche",10.0f);
+            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche",10.0f, "https://meusite.com/imagens/hamburguer.jpg", 1L, "top");
 
             when(produtoService.editarProduto(produtoRequestDTO, idProduto)).thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "Já existe um produto com esse nome."));
 
@@ -229,7 +242,7 @@ public class ProdutoControllerTest {
         @WithMockUser(username = "cliente@email.com")
         void editarProduto_comRoleUser_deveRetornarForbidden() throws Exception {
             Long idProduto = 1L;
-            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche", 10.0f);
+            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche", 10.0f, "https://meusite.com/imagens/hamburguer.jpg", 1L, "top");
             mockMvc.perform(put("/produtos/{idProduto}",idProduto)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(produtoRequestDTO)))
@@ -298,7 +311,7 @@ public class ProdutoControllerTest {
         @WithMockUser(username = "cliente@email.com")
         void deletarProduto_comRoleUser_deveRetornarForbidden() throws Exception {
             Long idProduto = 1L;
-            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche", 10.0f);
+            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("lanche", 10.0f, "https://meusite.com/imagens/hamburguer.jpg", 1L, "top");
             mockMvc.perform(delete("/produtos/{idProduto}",idProduto)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(produtoRequestDTO)))

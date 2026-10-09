@@ -2,6 +2,7 @@ package com.warlley.anotapedido_api.service;
 
 import com.warlley.anotapedido_api.dto.ProdutoRequestDTO;
 import com.warlley.anotapedido_api.dto.ProdutoResponseDTO;
+import com.warlley.anotapedido_api.model.Categoria;
 import com.warlley.anotapedido_api.model.Produto;
 import com.warlley.anotapedido_api.repository.ProdutoRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +35,8 @@ public class ProdutoServiceTest {
         @DisplayName("Deve Retornar status 200 OK e produto.")
         void deveBuscarProduto(){
             Long idProduto = 1L;
-            Produto produtoBuscado = new Produto(1L,"Pizza",10.0f);
+            Categoria categoria = new Categoria(1L, "Pizza");
+            Produto produtoBuscado = new Produto(1L,"Pizza",10.0f, "https://meusite.com/imagens/hamburguer.jpg", categoria, "top");
             when(produtoRepository.existsById(idProduto)).thenReturn(true);
             when(produtoRepository.findById(idProduto)).thenReturn(Optional.of(produtoBuscado));
 
@@ -43,7 +45,10 @@ public class ProdutoServiceTest {
             assertNotNull(resultado);
             assertEquals(1L,resultado.id());
             assertEquals("Pizza",resultado.nome());
-            assertEquals(10.0f,resultado.valor());
+            assertEquals(10.0f,resultado.preco());
+            assertEquals("https://meusite.com/imagens/hamburguer.jpg",resultado.imagemUrl());
+            assertEquals(categoria,resultado.categoria());
+            assertEquals("top",resultado.descricao());
 
             verify(produtoRepository,times(1)).existsById(idProduto);
             verify(produtoRepository,times(1)).findById(idProduto);
@@ -70,8 +75,9 @@ public class ProdutoServiceTest {
         @Test
         @DisplayName("Deve Retornar status 201 Created e produto.")
         void deveCadastrarProduto(){
-            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("Pizza",10.0f);
-            Produto produtoSalvo = new Produto(1L,"Pizza",10.0f);
+            Categoria categoria = new Categoria(1L, "Pizza");
+            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("Pizza",10.0f, "https://meusite.com/imagens/hamburguer.jpg", 1L, "top");
+            Produto produtoSalvo = new Produto(1L,"Pizza",10.0f, "https://meusite.com/imagens/hamburguer.jpg",categoria, "top");
             when(produtoRepository.existsByNome(produtoRequestDTO.nome())).thenReturn(false);
             when(produtoRepository.save(produtoSalvo));
 
@@ -80,7 +86,10 @@ public class ProdutoServiceTest {
             assertNotNull(resultado);
             assertEquals(1L,resultado.id());
             assertEquals("Pizza",resultado.nome());
-            assertEquals(10.0f,resultado.valor());
+            assertEquals(10.0f,resultado.preco());
+            assertEquals("https://meusite.com/imagens/hamburguer.jpg",resultado.imagemUrl());
+            assertEquals(categoria,resultado.categoria());
+            assertEquals("top",resultado.descricao());
 
             verify(produtoRepository,times(1)).existsByNome(produtoRequestDTO.nome());
             verify(produtoRepository,times(1)).save(produtoSalvo);
@@ -88,8 +97,9 @@ public class ProdutoServiceTest {
         @Test
         @DisplayName("Deve Retornar status 409 Conflict quando produto já existe.")
         void deveLancarExcecaoConflitoCadastrarProduto(){
-            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("Pizza",10.0f);
-            Produto produtoSalvo = new Produto(1L,"Pizza",10.0f);
+            Categoria categoria = new Categoria(1L, "Pizza");
+            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("Pizza",10.0f, "https://meusite.com/imagens/hamburguer.jpg", 1L, "top");
+            Produto produtoSalvo = new Produto(1L,"Pizza",10.0f, "https://meusite.com/imagens/hamburguer.jpg", categoria, "top");
             when(produtoRepository.existsByNome(produtoRequestDTO.nome())).thenReturn(true);
 
             ResponseStatusException ex =
@@ -109,8 +119,9 @@ public class ProdutoServiceTest {
         @DisplayName("Deve Retornar status 200 OK quando produto atualizado com sucesso.")
         void deveEditarProduto(){
             Long idProduto = 1L;
-            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("Pizza",10.0f);
-            Produto produtoNovo = new Produto(1L,"Pizza",10.0f);
+            Categoria categoria = new Categoria(1L, "Pizza");
+            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("Pizza",10.0f, "https://meusite.com/imagens/hamburguer.jpg", 1L, "top");
+            Produto produtoNovo = new Produto(1L,"Pizza",10.0f, "https://meusite.com/imagens/hamburguer.jpg", categoria, "top");
             when(produtoRepository.existsById(idProduto)).thenReturn(true);
             when(produtoRepository.existsByNome(produtoRequestDTO.nome())).thenReturn(false);
             when(produtoRepository.save(produtoNovo));
@@ -120,7 +131,10 @@ public class ProdutoServiceTest {
             assertNotNull(resultado);
             assertEquals(1L,resultado.id());
             assertEquals("Pizza",resultado.nome());
-            assertEquals(10.0f,resultado.valor());
+            assertEquals(10.0f,resultado.preco());
+            assertEquals("https://meusite.com/imagens/hamburguer.jpg",resultado.imagemUrl());
+            assertEquals(categoria,resultado.categoria());
+            assertEquals("top",resultado.descricao());
 
             verify(produtoRepository,times(1)).existsById(idProduto);
             verify(produtoRepository,times(1)).existsByNome(produtoRequestDTO.nome());
@@ -145,7 +159,7 @@ public class ProdutoServiceTest {
         @DisplayName("Deve Retornar status 409 Conflict quando produto já existe com esse nome.")
         void deveLancarExcecaoConflitoEditarProduto(){
             Long idProduto = 1L;
-            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("Pizza",10.0f);
+            ProdutoRequestDTO produtoRequestDTO = new ProdutoRequestDTO("Pizza",10.0f, "https://meusite.com/imagens/hamburguer.jpg", 1L, "top");
             when(produtoRepository.existsById(idProduto)).thenReturn(true);
             when(produtoSevice.buscarProduto(idProduto).nome().equals(produtoRequestDTO.nome())).thenReturn(false);
             when(produtoRepository.existsByNome(produtoRequestDTO.nome())).thenReturn(true);
